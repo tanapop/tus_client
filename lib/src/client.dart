@@ -1,4 +1,4 @@
-import 'dart:convert' show base64, utf8;
+import 'dart:convert' show base64, jsonDecode, utf8;
 import 'dart:math' show min;
 import 'dart:typed_data' show Uint8List;
 import 'exceptions.dart';
@@ -93,6 +93,7 @@ class TusClient {
           "unexpected status code (${response.statusCode}) while creating upload");
     }
 
+    final responseBody = jsonDecode(response.body);
     String urlStr = responseBody['upload']['upload_link'] ?? "";
     if (urlStr.isEmpty) {
       throw ProtocolException(
