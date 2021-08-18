@@ -74,6 +74,9 @@ class TusClient {
   /// Create a new [upload] throwing [ProtocolException] on server error
   create() async {
     _fileSize = await file.length();
+    
+    final msg =
+        '{"name": "ttt","description": "ggg","upload": {"approach": "tus","size": $_fileSize},"privacy": {"view": "disable"}}';
 
     final client = getHttpClient();
     final createHeaders = Map<String, String>.from(headers ?? {})
@@ -83,14 +86,14 @@ class TusClient {
         "Upload-Length": "$_fileSize",
       });
 
-    final response = await client.post(url, headers: createHeaders);
+    final response = await client.post(url, headers: createHeaders, body: msg);
     if (!(response.statusCode >= 200 && response.statusCode < 300) &&
         response.statusCode != 404) {
       throw ProtocolException(
           "unexpected status code (${response.statusCode}) while creating upload");
     }
 
-    String urlStr = response.headers["location"] ?? "";
+    String urlStr = responseBody['upload']['upload_link'] ?? "";
     if (urlStr.isEmpty) {
       throw ProtocolException(
           "missing upload Uri in response for creating upload");
