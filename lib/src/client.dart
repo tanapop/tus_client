@@ -19,6 +19,9 @@ class TusClient {
 
   /// Storage used to save and retrieve upload URLs by its fingerprint.
   final TusStore? store;
+  
+  final String? name;
+  final String? description;
 
   final XFile file;
 
@@ -47,6 +50,8 @@ class TusClient {
   TusClient(
     this.url,
     this.file, {
+    this.name,
+    this.description,
     this.store,
     this.headers,
     this.metadata = const {},
@@ -70,13 +75,15 @@ class TusClient {
 
   /// Override this method to use a custom Client
   http.Client getHttpClient() => http.Client();
+  
+  String vimeoLink = "";
 
   /// Create a new [upload] throwing [ProtocolException] on server error
   create() async {
     _fileSize = await file.length();
     
     final msg =
-        '{"name": "ttt","description": "ggg","upload": {"approach": "tus","size": $_fileSize},"privacy": {"view": "disable"}}';
+        '{"name": "$name","description": "$description","upload": {"approach": "tus","size": $_fileSize},"privacy": {"view": "disable"}}';
 
     final client = getHttpClient();
     final createHeaders = Map<String, String>.from(headers ?? {})
@@ -95,6 +102,7 @@ class TusClient {
 
     final responseBody = jsonDecode(response.body);
     String urlStr = responseBody['upload']['upload_link'] ?? "";
+    vimeoLink = responseBody['link'];
     if (urlStr.isEmpty) {
       throw ProtocolException(
           "missing upload Uri in response for creating upload");
@@ -125,7 +133,7 @@ class TusClient {
   /// [ProtocolException] on server error
   upload({
     Function(double)? onProgress,
-    Function()? onComplete,
+    Function(String)? onComplete,
   }) async {
     if (!await resume()) {
       await create();
@@ -178,7 +186,7 @@ class TusClient {
       if (_offset == totalBytes) {
         this.onComplete();
         if (onComplete != null) {
-          onComplete();
+          onComplete(vimeoLink);
         }
       }
     }
