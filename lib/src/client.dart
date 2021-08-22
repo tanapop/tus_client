@@ -89,7 +89,7 @@ class TusClient {
     final createHeaders = Map<String, String>.from(headers ?? {})
       ..addAll({
         "Tus-Resumable": tusVersion,
-        "Upload-Metadata": _uploadMetadata ,
+        "Upload-Metadata": _uploadMetadata ?? "",
         "Upload-Length": "$_fileSize",
       });
 
@@ -205,7 +205,7 @@ class TusClient {
 
   /// Override this method to customize creating file fingerprint
   String? generateFingerprint() {
-    return file.path?.replaceAll(RegExp(r"\W+"), '.');
+    return file.path.replaceAll(RegExp(r"\W+"), '.');
   }
 
   /// Override this to customize creating 'Upload-Metadata'
