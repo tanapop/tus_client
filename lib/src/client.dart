@@ -89,7 +89,7 @@ class TusClient {
     final createHeaders = Map<String, String>.from(headers ?? {})
       ..addAll({
         "Tus-Resumable": tusVersion,
-        "Upload-Metadata": _uploadMetadata ?? "",
+        "Upload-Metadata": _uploadMetadata ,
         "Upload-Length": "$_fileSize",
       });
 
@@ -101,7 +101,7 @@ class TusClient {
     }
 
     final responseBody = jsonDecode(response.body);
-    String urlStr = responseBody['upload']['upload_link'] ?? "";
+    String urlStr = responseBody['upload']['upload_link'];
     vimeoLink = responseBody['link'];
     if (urlStr.isEmpty) {
       throw ProtocolException(
@@ -213,7 +213,7 @@ class TusClient {
     final meta = Map<String, String>.from(metadata ?? {});
 
     if (!meta.containsKey("filename")) {
-      meta["filename"] = p.basename(file.path ?? "");
+      meta["filename"] = p.basename(file.path );
     }
 
     return meta.entries
