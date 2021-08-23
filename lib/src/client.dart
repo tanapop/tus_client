@@ -19,7 +19,7 @@ class TusClient {
 
   /// Storage used to save and retrieve upload URLs by its fingerprint.
   final TusStore? store;
-  
+
   final String? name;
   final String? description;
 
@@ -51,13 +51,13 @@ class TusClient {
     this.url,
     this.file, {
     this.name = "",
-    this.description ="",
+    this.description = "",
     this.store,
     this.headers,
     this.metadata = const {},
     this.maxChunkSize = 512 * 1024,
   }) {
-    _fingerprint = generateFingerprint() ?? "";
+    _fingerprint = generateFingerprint()!;
     _uploadMetadata = generateMetadata();
   }
 
@@ -71,17 +71,17 @@ class TusClient {
   String get fingerprint => _fingerprint;
 
   /// The 'Upload-Metadata' header sent to server
-  String get uploadMetadata => _uploadMetadata ?? "";
+  String get uploadMetadata => _uploadMetadata!;
 
   /// Override this method to use a custom Client
   http.Client getHttpClient() => http.Client();
-  
+
   String vimeoLink = "";
 
   /// Create a new [upload] throwing [ProtocolException] on server error
   create() async {
     _fileSize = await file.length();
-    
+
     final msg =
         '{"name": "$name","description": "$description","upload": {"approach": "tus","size": $_fileSize},"privacy": {"view": "disable"}}';
 
@@ -89,7 +89,7 @@ class TusClient {
     final createHeaders = Map<String, String>.from(headers ?? {})
       ..addAll({
         "Tus-Resumable": tusVersion,
-        "Upload-Metadata": _uploadMetadata ?? "",
+        "Upload-Metadata": _uploadMetadata!,
         "Upload-Length": "$_fileSize",
       });
 
@@ -195,17 +195,17 @@ class TusClient {
   /// Pause the current upload
   pause() {
     _pauseUpload = true;
-    _chunkPatchFuture?.timeout(Duration.zero, onTimeout: () {});
+    _chunkPatchFuture!.timeout(Duration.zero, onTimeout: () {});
   }
 
   /// Actions to be performed after a successful upload
   void onComplete() {
-    store?.remove(_fingerprint);
+    store!.remove(_fingerprint);
   }
 
   /// Override this method to customize creating file fingerprint
   String? generateFingerprint() {
-    return file.path.replaceAll(RegExp(r"\W+"), '.');
+    return file.path?.replaceAll(RegExp(r"\W+"), '.');
   }
 
   /// Override this to customize creating 'Upload-Metadata'
@@ -213,7 +213,7 @@ class TusClient {
     final meta = Map<String, String>.from(metadata ?? {});
 
     if (!meta.containsKey("filename")) {
-      meta["filename"] = p.basename(file.path );
+      meta["filename"] = p.basename(file.path!);
     }
 
     return meta.entries
